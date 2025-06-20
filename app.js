@@ -29,6 +29,10 @@ const authRoutes = require('./routes/auth');
 const propertyRoutes = require('./routes/property');
 const adminRoutes = require('./routes/admin');
 
+app.get('/', (req, res) => {
+  res.status(200).json({ success: true, message: 'Welcome to the Real Estate API' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/admin', adminRoutes);
