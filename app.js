@@ -19,7 +19,16 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: "Content-Type,Authorization",
+  exposedHeaders: "Content-Type,Authorization",
+  credentials: true,
+  preflightContinue: false,
+  maxAge: 86400,
+  optionsSuccessStatus: 200 
+}));
 app.use(express.json());
 app.use(cookieParser());
 
