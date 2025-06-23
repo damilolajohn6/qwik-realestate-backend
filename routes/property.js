@@ -182,12 +182,11 @@ router.get("/", async (req, res) => {
     query.$text = { $search: search };
   }
 
-  // Geospatial query
+  // Geospatial query using $geoWithin
   if (lat && lng && radius) {
     query.locationCoordinates = {
-      $near: {
-        $geometry: { type: "Point", coordinates: [Number(lng), Number(lat)] },
-        $maxDistance: Number(radius) * 1000, // Radius in meters
+      $geoWithin: {
+        $centerSphere: [[Number(lng), Number(lat)], Number(radius) / 6378.1], // Radius in radians (Earth's radius ~6378.1 km)
       },
     };
   }
@@ -195,7 +194,12 @@ router.get("/", async (req, res) => {
   if (location) query.location = new RegExp(location, "i");
   if (type) query.type = type;
   if (amenities)
-    query.amenities = { $all: amenities.toString().split(",").map((a) => a.trim()) };
+    query.amenities = {
+      $all: amenities
+        .toString()
+        .split(",")
+        .map((a) => a.trim()),
+    };
   if (bedrooms) query.bedrooms = Number(bedrooms);
   if (bathrooms) query.bathrooms = Number(bathrooms);
 
@@ -467,7 +471,9 @@ router.post(
 router.get("/user", protect, agent, async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ success: false, message: "User not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User not authenticated" });
     }
 
     const {
@@ -503,12 +509,11 @@ router.get("/user", protect, agent, async (req, res) => {
       query.$text = { $search: search };
     }
 
-    // Geospatial query
+    // Geospatial query using $geoWithin
     if (lat && lng && radius) {
       query.locationCoordinates = {
-        $near: {
-          $geometry: { type: "Point", coordinates: [Number(lng), Number(lat)] },
-          $maxDistance: Number(radius) * 1000, // Radius in meters
+        $geoWithin: {
+          $centerSphere: [[Number(lng), Number(lat)], Number(radius) / 6378.1], // Radius in radians
         },
       };
     }
@@ -516,7 +521,12 @@ router.get("/user", protect, agent, async (req, res) => {
     if (location) query.location = new RegExp(location, "i");
     if (type) query.type = type;
     if (amenities)
-      query.amenities = { $all: amenities.toString().split(",").map((a) => a.trim()) };
+      query.amenities = {
+        $all: amenities
+          .toString()
+          .split(",")
+          .map((a) => a.trim()),
+      };
     if (bedrooms) query.bedrooms = Number(bedrooms);
     if (bathrooms) query.bathrooms = Number(bathrooms);
     if (status) query.status = status;
